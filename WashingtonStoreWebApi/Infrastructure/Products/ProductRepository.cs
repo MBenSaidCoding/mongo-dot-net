@@ -56,5 +56,18 @@ namespace WashingtonStoreWebApi.Infrastructure.Products
             var filterDefinition = Builders<Product>.Filter.Eq(p=>p.ProductId,id);
             return await productsMongoCollection.Find<Product>(filterDefinition).FirstOrDefaultAsync();
         }
+
+        public async Task ReplaceOne(Product product)
+        {
+            await productsMongoCollection
+                    .ReplaceOneAsync<Product>(p=>p.ProductId == product.ProductId,
+                    product);
+        }
+
+        public async Task Update(Product product)
+        {
+            var updateDefinition = Builders<Product>.Update.Set(p=>p.Description, product.Description);
+            await productsMongoCollection.UpdateOneAsync<Product>(p=>p.ProductId == product.ProductId,updateDefinition);
+        }
     }
 }

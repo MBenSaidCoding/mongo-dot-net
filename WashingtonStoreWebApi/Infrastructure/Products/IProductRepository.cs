@@ -9,5 +9,9 @@ namespace WashingtonStoreWebApi.Infrastructure.Products
         Task<List<Product>> Search(string searchSentence);
 
         Task InsertOne (Product product);
+
+        Task ReplaceOne(Product product);
+
+        Task Update(Product product);
     }
 }

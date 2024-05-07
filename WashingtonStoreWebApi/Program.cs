@@ -1,6 +1,7 @@
 using WashingtonStoreWebApi.Configurations;
 using WashingtonStoreWebApi.Infrastructure.Products;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,7 +10,9 @@ builder.Services.Configure<StoreDbSettings>(builder.Configuration.GetSection(nam
 builder.Services.AddSingleton<IProductRepository, ProductRepository>();
 
 //will rnot emove the suffix "Async" applied to controller action names ( to resolve the problem of redirection using CreatedAtAction )
-builder.Services.AddControllers(options=>options.SuppressAsyncSuffixInActionNames = false);
+builder.Services.AddControllers(options=>{
+    options.SuppressAsyncSuffixInActionNames = false;
+    }).AddNewtonsoftJson();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

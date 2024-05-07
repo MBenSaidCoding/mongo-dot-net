@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Docs.Samples;
 using WashingtonStoreWebApi.Infrastructure.Products;
 using WashingtonStoreWebApi.Models;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace WashingtonStoreWebApi.Controllers
 {
@@ -43,6 +44,57 @@ namespace WashingtonStoreWebApi.Controllers
         {
             await _productRepository.InsertOne(product);
             return CreatedAtAction(nameof(GetByIdAsync), new {id=product.ProductId}, product);
+        }
+
+        [HttpPut]
+        public async Task<ActionResult> Replace([FromBody] Product product)
+        {
+            if (product.ProductId is null)
+            {
+                return BadRequest("The productId can not be null");
+            }
+
+            var existingProduct = await _productRepository.GetById(product.ProductId);
+            if (existingProduct is null)
+            {
+                return BadRequest("The product doesn't exist");
+            }
+
+            await _productRepository.ReplaceOne(product);
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> PatchProduct(string id, [FromBody] JsonPatchDocument<Product> patchDoc)
+        {
+            try
+            {
+                if(patchDoc is not null)
+                {
+                    var product = await _productRepository.GetById(id);
+                    if(product is null)
+                    {
+                        return NotFound();
+                    }
+
+                    patchDoc.ApplyTo(product,HandleJsonPatchError);
+
+                    await _productRepository.ReplaceOne(product);
+                    return NoContent();
+
+                }
+
+                return BadRequest();
+            }
+            catch (System.Exception ex)
+            {
+                 return BadRequest(ex.Message);
+            }
+        }
+
+        private void HandleJsonPatchError(JsonPatchError jsonPatchError)
+        {
+            throw new Exception(jsonPatchError.ErrorMessage);
         }
     }
 }
